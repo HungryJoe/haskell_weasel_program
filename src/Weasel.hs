@@ -21,12 +21,10 @@ mutateChar probability (ch, randomGen)
     where (doMutate, randomGen') = (fst (roll randomGen) < probability, snd (roll randomGen))
           roll = uniformR (0 :: Float, 1 :: Float)
 
--- Fitness is in [0, length expected]
+-- Fitness is in [0, min (length left) (length right)]
 calculateFitness :: String -> String -> Int
-calculateFitness (e:xpected) (a:ctual)
-    | e == a = 1 + calculateFitness xpected ctual
-    | otherwise = calculateFitness xpected ctual
-calculateFitness _ _ = 0
+calculateFitness left right = sum $ zipWith score left right
+    where score x y = if x == y then 1 else 0
 
 spawnNextGeneration :: RandomGen g => String -> Float -> Int -> (String, g) -> (String, g)
 spawnNextGeneration target mutChance numCopies current = first (snd . findMostFit) (copyAndMutate mutChance numCopies current)
