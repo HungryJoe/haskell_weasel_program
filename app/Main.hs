@@ -1,6 +1,6 @@
 module Main where
 
-import Weasel (evolve, spawnInitialGeneration)
+import Ace (evolve, spawnInitialGeneration)
 import System.Environment (getArgs)
 import System.Random (initStdGen)
 
