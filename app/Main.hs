@@ -1,7 +1,7 @@
 module Main where
 
 import qualified Ace (evolve, spawnInitialGeneration)
-import qualified Sexual (evolve, spawnInitialGeneration)
+import qualified Allo (evolve, spawnInitialGeneration)
 import System.Environment (getArgs)
 import System.Random (initStdGen)
 
@@ -15,8 +15,8 @@ main = do
   rng <- initStdGen
   let aceInitialGen = Ace.spawnInitialGeneration rng (length target)
   let (aceGenerations, rng') = Ace.evolve target mutChance numCopies aceInitialGen
-  let alloInitialGen = Sexual.spawnInitialGeneration rng (length target) numCopies
-  let (alloGenerations, rng') = Sexual.evolve target mutChance numCopies alloInitialGen
+  let alloInitialGen = Allo.spawnInitialGeneration rng (length target) numCopies
+  let (alloGenerations, rng') = Allo.evolve target mutChance numCopies alloInitialGen
   print $ "It took " ++ show (length aceGenerations) ++ " to asexually generate:"
   print $ last aceGenerations
   print $ "It took " ++ show (length alloGenerations) ++ " to allosexually generate:"

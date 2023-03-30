@@ -1,4 +1,4 @@
-module Sexual (spawnInitialGeneration, evolve, spawnNextGeneration) where
+module Allo (spawnInitialGeneration, evolve, spawnNextGeneration) where
 import System.Random (RandomGen, Random (random))
 import Util (spawnOrganism, findMostFit, mutate, calculateFitness)
 import Data.Set (cartesianProduct, fromList, toList, filter)
