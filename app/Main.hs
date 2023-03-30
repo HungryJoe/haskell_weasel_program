@@ -1,6 +1,7 @@
 module Main where
 
-import Ace (evolve, spawnInitialGeneration)
+import qualified Ace (evolve, spawnInitialGeneration)
+import qualified Sexual (evolve, spawnInitialGeneration)
 import System.Environment (getArgs)
 import System.Random (initStdGen)
 
@@ -12,7 +13,11 @@ main = do
   let mutChance = if length args == 3 then read (args !! 1) else 0.05
   let numCopies = if length args == 3 then read (args !! 2) else 100
   rng <- initStdGen
-  let initialGen = spawnInitialGeneration rng (length target)
-  let (generations, rng') = evolve target mutChance numCopies initialGen
-  print $ "It took " ++ show (length generations) ++ " to generate:"
-  print $ last generations
+  let aceInitialGen = Ace.spawnInitialGeneration rng (length target)
+  let (aceGenerations, rng') = Ace.evolve target mutChance numCopies aceInitialGen
+  let alloInitialGen = Sexual.spawnInitialGeneration rng (length target) numCopies
+  let (alloGenerations, rng') = Sexual.evolve target mutChance numCopies alloInitialGen
+  print $ "It took " ++ show (length aceGenerations) ++ " to asexually generate:"
+  print $ last aceGenerations
+  print $ "It took " ++ show (length alloGenerations) ++ " to allosexually generate:"
+  print $ last alloGenerations
