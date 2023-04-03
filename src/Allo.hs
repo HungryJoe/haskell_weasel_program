@@ -1,6 +1,6 @@
 module Allo (spawnInitialGeneration, evolve, spawnNextGeneration) where
 import System.Random (RandomGen, Random (random))
-import Util (spawnOrganism, findMostFit, mutate, calculateFitness)
+import Util (spawnOrganism, findMostFit, mutate, calculateFitness, mutateAll)
 import Data.Set (cartesianProduct, fromList, toList, filter)
 import Data.Bifunctor (Bifunctor(first))
 
@@ -10,11 +10,6 @@ spawnNextGeneration target mutChance numFittestToPick (current, randomGen) = (mu
           parentPairs = toList $ Data.Set.filter (uncurry (/=)) $ cartesianProduct parents parents
           (offspring, randomGen') = recombinePairs (parentPairs, randomGen)
           (mutatedOffspring, randomGen'') = mutateAll mutChance (offspring, randomGen')
-
-mutateAll :: RandomGen g => Float -> ([String], g) -> ([String], g)
-mutateAll mutChance ([], randomGen) = ([], randomGen)
-mutateAll mutChance (org:rest, randomGen) = first (mutatedOrg:) $ mutateAll mutChance (rest, randomGen')
-    where (mutatedOrg, randomGen') = mutate mutChance (org, randomGen)
 
 recombinePairs :: RandomGen g => ([(String, String)], g) -> ([String], g)
 recombinePairs ([], randomGen) = ([], randomGen)

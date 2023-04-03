@@ -48,3 +48,8 @@ spawnOrganism randomGen len = first (nextLetter:) $ spawnOrganism randomGen' (le
 findMostFit :: String -> Int -> [String] -> [String]
 findMostFit target numMostFit copies = map snd $ take numMostFit $ sortOn (Down . fst) $ map (appendFitness target) copies
     where appendFitness target organism = (calculateFitness target organism, organism)
+
+mutateAll :: RandomGen g => Float -> ([String], g) -> ([String], g)
+mutateAll mutChance ([], randomGen) = ([], randomGen)
+mutateAll mutChance (org:rest, randomGen) = first (mutatedOrg:) $ mutateAll mutChance (rest, randomGen')
+    where (mutatedOrg, randomGen') = mutate mutChance (org, randomGen)
