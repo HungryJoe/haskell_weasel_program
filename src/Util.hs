@@ -1,9 +1,19 @@
-module Util (mutate, calculateFitness, genLetter, spawnOrganism, findMostFit) where
+module Util where
 import System.Random (RandomGen, uniformR)
 import Data.Bifunctor (Bifunctor(first))
 import Data.List (maximumBy, sortBy, sortOn)
 import Data.Function (on)
 import Data.Ord
+
+class EvolutionaryAlgorithm a where
+    spawnInitialGeneration :: RandomGen g => Int -> a -> g -> ([String], g)
+    spawnNextGeneration :: RandomGen g => String -> a -> ([String], g) -> ([String], g)
+
+evolve :: (RandomGen g, EvolutionaryAlgorithm ea) => String -> ea -> ([String], g) -> ([[String]], g)
+evolve target evAlg current@(currentGen, randomGen)
+    | calculateFitness target (head $ findMostFit target 1 currentGen) == length target = ([currentGen], randomGen)
+    | otherwise = first (nextGen:) $ evolve target evAlg next
+    where next@(nextGen, _) = spawnNextGeneration target evAlg current
 
 mutate :: RandomGen g => Float -> (String, g) -> (String, g)
 -- Generate a string identical to organism except each letter has a probability * 100% chance to be changed to a random other letter
