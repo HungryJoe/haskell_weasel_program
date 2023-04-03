@@ -1,15 +1,8 @@
-module Allo (spawnInitialGeneration, evolve, spawnNextGeneration) where
+module Allo where
 import System.Random (RandomGen, Random (random))
-import Util (spawnOrganism, findMostFit, mutate, calculateFitness, mutateAll)
+import Util
 import Data.Set (cartesianProduct, fromList, toList, filter)
 import Data.Bifunctor (Bifunctor(first))
-
-spawnNextGeneration :: RandomGen g => String -> Float -> Int -> ([String], g) -> ([String], g)
-spawnNextGeneration target mutChance numFittestToPick (current, randomGen) = (mutatedOffspring, randomGen'')
-    where parents = fromList $ findMostFit target numFittestToPick current
-          parentPairs = toList $ Data.Set.filter (uncurry (/=)) $ cartesianProduct parents parents
-          (offspring, randomGen') = recombinePairs (parentPairs, randomGen)
-          (mutatedOffspring, randomGen'') = mutateAll mutChance (offspring, randomGen')
 
 recombinePairs :: RandomGen g => ([(String, String)], g) -> ([String], g)
 recombinePairs ([], randomGen) = ([], randomGen)
@@ -24,14 +17,14 @@ recombinePair (parentA, parentB) = go zippedParents
             where (coinFlip, randomGen') = random randomGen
                   result = if coinFlip then a else b
 
-spawnInitialGeneration :: RandomGen g => g -> Int -> Int -> ([String], g)
-spawnInitialGeneration randomGen _ 0 = ([], randomGen)
-spawnInitialGeneration randomGen orgLen numOrgs = (nextOrg : restOfList, randomGen'')
-    where (nextOrg, randomGen') = spawnOrganism randomGen orgLen
-          (restOfList, randomGen'') = spawnInitialGeneration randomGen' orgLen (numOrgs - 1)
-
-evolve :: RandomGen g => String -> Float -> Int -> ([String], g) -> ([[String]], g)
-evolve target mutChance numFittestToPick current@(currentGen, randomGen)
-    | calculateFitness target (head $ findMostFit target 1 currentGen) == length target = ([currentGen], randomGen)
-    | otherwise = first (nextGen:) $ evolve target mutChance numFittestToPick next
-    where next@(nextGen, _) = spawnNextGeneration target mutChance numFittestToPick current
+data AlloWeasel = AlloWeasel {popSize :: Int, mutChance :: Float}
+instance EvolutionaryAlgorithm AlloWeasel where
+    spawnInitialGeneration orgLen AlloWeasel {popSize=_popSize, mutChance=_mutChance} randomGen = go randomGen _popSize
+        where go randomGen 0 = ([], randomGen)
+              go randomGen numOrgs = first (nextOrg :) $ go randomGen' (numOrgs - 1)
+                where (nextOrg, randomGen') = spawnOrganism randomGen orgLen
+    spawnNextGeneration target AlloWeasel {popSize=_popSize, mutChance=_mutChance} (current, randomGen) = (findMostFit target _popSize mutatedOffspring, randomGen'')
+        where parents = fromList current
+              parentPairs = toList $ Data.Set.filter (uncurry (/=)) $ cartesianProduct parents parents
+              (offspring, randomGen') = recombinePairs (parentPairs, randomGen)
+              (mutatedOffspring, randomGen'') = mutateAll _mutChance (offspring, randomGen')
